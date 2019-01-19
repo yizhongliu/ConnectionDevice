@@ -16,6 +16,7 @@
 package org.cybergarage.upnp.std.av.server.directory.file;
 
 import java.io.*;
+import java.util.List;
 
 import org.cybergarage.util.*;
 import org.cybergarage.xml.*;
@@ -34,7 +35,26 @@ public class FileDirectory extends Directory
 		super(name);
 		setPath(path);
 	}
+	//edit feng begin
+	public FileDirectory(String name, List<String> pathList) {
+		super(name);
+		setPathList(pathList);
+	}
 	
+	////////////////////////////////////////////////
+	// PathList
+	////////////////////////////////////////////////
+	
+	private List<String> pathList;
+
+	public List<String> getPathList() {
+		return pathList;
+	}
+
+	public void setPathList(List<String> pathList) {
+		this.pathList = pathList;
+	}
+	//edit feng end
 	////////////////////////////////////////////////
 	// Path
 	////////////////////////////////////////////////
@@ -68,7 +88,7 @@ public class FileDirectory extends Directory
 		// Title
 		String title = formatObj.getTitle();
 		if (0 < title.length())
-			itemNode.setTitle(title);
+			itemNode.setTitle(title.replaceAll("&", "&amp;"));
 			
 		// Creator
 		String creator = formatObj.getCreator();
@@ -123,19 +143,28 @@ public class FileDirectory extends Directory
 	
 	private int getDirectoryItemNodeList(File dirFile, FileItemNodeList itemNodeList)
 	{
-		File childFile[] = dirFile.listFiles();
-		int fileCnt = childFile.length;
-		for (int n=0; n<fileCnt; n++) {
-			File file = childFile[n];
-			if (file.isDirectory() == true) {
-				getDirectoryItemNodeList(file, itemNodeList);
-				continue;
+		//edit feng begin
+		if(dirFile.isFile()) {
+			FileItemNode itemNode = createCompareItemNode(dirFile);
+			if (itemNode != null) {
+				itemNodeList.add(itemNode);				
 			}
-			if (file.isFile() == true) {
-				FileItemNode itemNode = createCompareItemNode(file);
-				if (itemNode == null)
-					continue;						
-				itemNodeList.add(itemNode);
+		}else {
+			//edit feng end
+			File childFile[] = dirFile.listFiles();
+			int fileCnt = childFile.length;
+			for (int n=0; n<fileCnt; n++) {
+				File file = childFile[n];
+				if (file.isDirectory() == true) {
+					getDirectoryItemNodeList(file, itemNodeList);
+					continue;
+				}
+				if (file.isFile() == true) {
+					FileItemNode itemNode = createCompareItemNode(file);
+					if (itemNode == null)
+						continue;						
+					itemNodeList.add(itemNode);
+				}
 			}
 		}
 		return itemNodeList.size();
@@ -144,12 +173,22 @@ public class FileDirectory extends Directory
 	private FileItemNodeList getCurrentDirectoryItemNodeList()
 	{
 		FileItemNodeList itemNodeList = new FileItemNodeList();
-		String path = getPath();
-		File pathFile = new File(path);
-		getDirectoryItemNodeList(pathFile, itemNodeList);
+		//edit feng begin
+		if(null != getPath()) {
+			String path = getPath();
+			File pathFile = new File(path);
+			getDirectoryItemNodeList(pathFile, itemNodeList);			
+		}else if(null != getPathList()) {
+			List<String> pathList = getPathList();
+			for(String path : pathList) {
+				File pathFile = new File(path);
+				getDirectoryItemNodeList(pathFile, itemNodeList);
+			}
+		}
+		//edit feng end
 		return itemNodeList;
 	}
-
+	
 	////////////////////////////////////////////////
 	// updateItemNodeList
 	////////////////////////////////////////////////
