@@ -16,6 +16,8 @@
 
 package org.cybergarage.upnp.std.av.server;
 
+import android.content.Context;
+
 import java.io.*;
 
 import org.cybergarage.net.*;
@@ -92,6 +94,14 @@ public class MediaServer extends Device
 		}
 		catch (InvalidDescriptionException ide) {}
 	}
+
+	//llm patch begin
+	public MediaServer(Context context) throws InvalidDescriptionException
+	{
+		this(String.format(DESCRIPTION, DeviceUtil.getFriendlyName(context, "MediaServer"),
+				DeviceUtil.getUUID(context, "MediaServer")), ContentDirectory.SCPD, ConnectionManager.SCPD);
+	}
+	//llm patch end
 
 	public MediaServer(String description, String contentDirectorySCPD, String connectionManagerSCPD) throws InvalidDescriptionException
 	{

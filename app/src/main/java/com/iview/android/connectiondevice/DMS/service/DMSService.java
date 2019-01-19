@@ -72,7 +72,7 @@ public class DMSService extends Service {
         new Thread() {
             public void run() {
                 try {
-                    mediaServer = new MediaServer();
+                    mediaServer = new MediaServer(getApplication());
 
                     mediaServer.addPlugIn(new JPEGFormat());
                     mediaServer.addPlugIn(new PNGFormat());
